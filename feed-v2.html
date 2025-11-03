@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Permissions-Policy" content="autoplay=(self), encrypted-media=(self), fullscreen=(self), picture-in-picture=(self)" />
+		<title>AI Feed - undressly.app</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background: #000000;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+				height: 100%;
+			}
+
+			.feed-container {
+				width: 294px;
+				height: 244px;
+				background: #000000;
+				border-radius: 12px;
+				overflow: hidden;
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				margin: 3px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				touch-action: none;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				user-select: none;
+			}
+
+			.feed-scroll-area {
+				flex: 1;
+				overflow: hidden;
+				scroll-behavior: smooth;
+				scrollbar-width: none;
+				-ms-overflow-style: none;
+				touch-action: none;
+				-webkit-touch-callout: none;
+			}
+
+			.feed-scroll-area::-webkit-scrollbar {
+				display: none;
+			}
+
+			.feed-item {
+				position: relative;
+				width: 100%;
+				height: 244px;
+				display: flex;
+				flex-direction: column;
+				background: #000000;
+				overflow: hidden;
+			}
+
+			.feed-media {
+				position: relative;
+				flex: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(45deg, #1a1a1a, #2a1a2a);
+				overflow: hidden;
+				cursor: pointer;
+			}
+
+			.feed-video,
+			.feed-image {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: center center;
+				background: #1a1a1a;
+			}
+
+			.feed-video {
+				cursor: pointer;
+			}
+
+			.video-placeholder {
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #8b5cf6 100%);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 14px;
+				font-weight: 600;
+				text-align: center;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.video-icon {
+				font-size: 24px;
+			}
+
+			.feed-overlay {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+				padding: 16px 12px 12px;
+				color: white;
+			}
+
+			.character-info {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 4px;
+			}
+
+			.character-avatar {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: linear-gradient(45deg, #ec4899, #f472b6);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 9px;
+				font-weight: bold;
+				flex-shrink: 0;
+			}
+
+			.character-name {
+				font-size: 11px;
+				font-weight: 600;
+				color: white;
+			}
+
+			.character-description {
+				font-size: 10px;
+				color: rgba(255, 255, 255, 0.8);
+				line-height: 1.3;
+				margin-bottom: 4px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				max-width: 100%;
+			}
+
+			.action-bar {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.action-item {
+				display: flex;
+				align-items: center;
+				gap: 3px;
+				font-size: 10px;
+				color: rgba(255, 255, 255, 0.9);
+				cursor: pointer;
+				transition: transform 0.2s;
+			}
+
+			.action-item:hover {
+				transform: scale(1.1);
+			}
+
+			.love-icon {
+				color: #ec4899;
+				font-size: 14px;
+			}
+
+			.user-tag {
+				color: rgba(255, 255, 255, 0.7);
+				font-size: 10px;
+				font-weight: 500;
+			}
+
+			.clickable-element {
+				cursor: pointer;
+				transition: opacity 0.2s;
+			}
+
+			.clickable-element:hover {
+				opacity: 0.8;
+			}
+
+			/* Popup overlay styles - matching main feed */
+			.popup-overlay {
+				position: absolute;
+				top: -3px;
+				left: -3px;
+				right: -3px;
+				bottom: -3px;
+				background: rgba(0, 0, 0, 0.6);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				animation: fadeIn 0.3s ease-out;
+				z-index: 1000;
+				backdrop-filter: blur(2px);
+				border-radius: 12px;
+			}
+
+			.popup-overlay.show {
+				display: flex;
+			}
+
+			.popup-content {
+				background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(42, 26, 42, 0.9) 100%);
+				border-radius: 16px;
+				padding: 24px 20px;
+				text-align: center;
+				border: 1px solid rgba(236, 72, 153, 0.3);
+				max-width: 240px;
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+				backdrop-filter: blur(8px);
+			}
+
+			.popup-title {
+				color: white;
+				font-size: 16px;
+				font-weight: 700;
+				margin-bottom: 8px;
+				background: linear-gradient(45deg, #ec4899, #f472b6);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.popup-subtitle {
+				color: rgba(255, 255, 255, 0.8);
+				font-size: 12px;
+				margin-bottom: 20px;
+				line-height: 1.4;
+			}
+
+			.popup-button {
+				background: linear-gradient(45deg, #ec4899, #f472b6);
+				color: white;
+				border: none;
+				border-radius: 12px;
+				padding: 12px 24px;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s;
+				width: 100%;
+				box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
+			}
+
+			.popup-button:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: scale(0.9);
+				}
+				to {
+					opacity: 1;
+					transform: scale(1);
+				}
+			}
+
+			/* Feed header with logo */
+			.feed-header {
+				position: absolute;
+				bottom: 12px;
+				right: 12px;
+				z-index: 100;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				cursor: pointer;
+				transition: all 0.2s;
+				height: 20px;
+			}
+
+			.feed-header:hover {
+				transform: scale(1.05);
+			}
+
+			.feed-icon {
+				width: 16px;
+				height: 16px;
+			}
+
+			.feed-logo {
+				font-size: 12px;
+				font-weight: 700;
+				letter-spacing: -0.3px;
+			}
+
+			.feed-logo .gradient-text {
+				background: linear-gradient(45deg, #ec4899, #f472b6, #f9a8d4, #fce7f3);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.feed-logo .white-text {
+				color: white;
+				font-weight: 400;
+			}
+
+			/* Swipe indicator animation */
+			.swipe-indicator {
+				position: absolute;
+				bottom: 80px;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 100;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 8px;
+				animation: swipeHint 3s ease-in-out;
+				pointer-events: none;
+			}
+
+			.swipe-text {
+				color: white;
+				font-size: 11px;
+				font-weight: 500;
+				text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+				opacity: 0.9;
+				text-align: center;
+				max-width: 250px;
+			}
+
+			.swipe-arrow {
+				width: 24px;
+				height: 24px;
+				border: 2px solid white;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: rgba(0, 0, 0, 0.6);
+				backdrop-filter: blur(4px);
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+			}
+
+			.swipe-arrow::after {
+				content: '↓';
+				color: white;
+				font-size: 14px;
+				font-weight: bold;
+				animation: bounceArrow 1s ease-in-out infinite;
+			}
+
+			@keyframes swipeHint {
+				0% {
+					opacity: 0;
+					transform: translateX(-50%) translateY(20px);
+				}
+				15% {
+					opacity: 1;
+					transform: translateX(-50%) translateY(0);
+				}
+				85% {
+					opacity: 1;
+					transform: translateX(-50%) translateY(0);
+				}
+				100% {
+					opacity: 0;
+					transform: translateX(-50%) translateY(-20px);
+				}
+			}
+
+			@keyframes bounceArrow {
+				0%,
+				100% {
+					transform: translateY(0);
+				}
+				50% {
+					transform: translateY(4px);
+				}
+			}
+
+			@keyframes pulseText {
+				0%,
+				100% {
+					opacity: 1;
+					transform: scale(1);
+					color: white;
+				}
+				50% {
+					opacity: 0.9;
+					transform: scale(1.05);
+					color: #ec4899;
+				}
+			}
+
+			.pulse-cta {
+				display: inline-block;
+				animation: pulseText 1s ease-in-out infinite;
+				font-weight: 600;
+			}
+
+			/* Hide indicator after first interaction */
+			.swipe-indicator.hidden {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="feed-container" id="feedContainer">
+			<!-- Feed 头部带 logo -->
+			<div class="feed-header" id="feedHeader">
+				<div class="feed-logo"><span class="gradient-text">undressly</span><span class="white-text">.app</span></div>
+			</div>
+
+			<div class="feed-scroll-area" id="feedScrollArea">
+				<!-- Feed 项目将动态生成 -->
+			</div>
+
+			<!-- 滑动指示器 -->
+			<div class="swipe-indicator" id="swipeIndicator">
+				<div class="swipe-text"><span class="pulse-cta">New content dropped!</span><br />Swipe to explore!</div>
+				<div class="swipe-arrow"></div>
+			</div>
+
+			<!-- 弹窗覆盖层 -->
+			<div class="popup-overlay" id="popupOverlay">
+				<div class="popup-content">
+					<div class="popup-title">Continue to Full Feed</div>
+					<div class="popup-subtitle">Explore unlimited AI sluts at undressly.app</div>
+					<button class="popup-button" id="popupButton">Join Now →</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			;(function () {
+				// 获取 URL 参数
+				const urlParams = new URLSearchParams(window.location.search)
+				const site = urlParams.get('site') || 'demo'
+				const ref = urlParams.get('ref') || site
+				const variant = urlParams.get('variant') || 'i-feed-v2'
+
+				// 视频追踪
+				let videosViewed = new Set([0]) // 从第一个视频已观看开始
+				let hasShownPopup = false
+				let currentVideoIndex = 0
+				let isMuted = true
+				let hasInteracted = false
+				let isNavigating = false
+				let lastNavigationTime = 0
+
+				// Feed 数据（来自 CSV）
+				const allFeedItems = [
+					{
+						id: 1,
+						handle: 'zoey',
+						character: {
+							name: 'Zoey',
+							avatar: 'Z',
+							description: 'You walk in on your step sister touching herself.',
+							username: '@anon_111fa2b5',
+						},
+						videoFile: 'zoey-optimized.mp4',
+						avatarFile: 'zoey-avatar.avif',
+						loves: '10k',
+						photosPath: 'photos/zoey-83',
+					},
+
+					{
+						id: 3,
+						handle: 'mina',
+						character: {
+							name: 'Mina Park',
+							avatar: 'M',
+							description: 'The new girl who just moved next door.',
+							username: '@anon_f11bedfd',
+						},
+						videoFile: 'mina-optimized.mp4',
+						avatarFile: 'mina-avatar.avif',
+						loves: '1.9k',
+						photosPath: 'photos/mina-park',
+					},
+					{
+						id: 4,
+						handle: 'nyx',
+						character: {
+							name: 'Nyx Tether',
+							avatar: 'N',
+							description: 'Nyx is a woman who has chosen to embark on a unique path of self-discovery',
+							username: '@jetstone',
+						},
+						videoFile: 'nyx-optimized.mp4',
+						avatarFile: 'nyx-avatar.avif',
+						loves: '343',
+						photosPath: 'photos/onyx-real-f5h6NkNiRV',
+					},
+					{
+						id: 5,
+						handle: 'lara',
+						character: {
+							name: 'Lara Quinn',
+							avatar: 'L',
+							description: 'Your stepsister with a secret fascination for voyeurism and a hidden desire',
+							username: '@kurtishurtis',
+						},
+						videoFile: 'lara-optimized.mp4',
+						avatarFile: 'lara-avatar.avif',
+						loves: '507',
+						photosPath: 'photos/lara-quinn',
+					},
+					{
+						id: 6,
+						handle: 'tylar',
+						character: {
+							name: 'Tylar',
+							avatar: 'T',
+							description: 'Your snowbunny GF is about to turn your world upside down',
+							username: '@daddykelli',
+						},
+						videoFile: 'tylar-optimized.mp4',
+						avatarFile: 'tylar-avatar.avif',
+						loves: '1.6k',
+						photosPath: 'photos/tylar',
+					},
+					{
+						id: 7,
+						handle: 'genie',
+						character: {
+							name: 'Genie',
+							avatar: 'G',
+							description: 'Seductive Arab Genie that grants me any wish',
+							username: '@hardjohnson',
+						},
+						videoFile: 'genie-optimized.mp4',
+						avatarFile: 'genie-avatar.avif',
+						loves: '1.3k',
+						photosPath: 'photos/genie',
+					},
+				]
+
+				// 打乱数组函数（Fisher-Yates 洗牌算法）- 确保每次刷新都随机
+				function shuffleArray(array) {
+					const shuffled = [...array] // 创建副本
+					
+					// 使用更可靠的随机方法，确保每次都是真正的随机
+					for (let i = shuffled.length - 1; i > 0; i--) {
+						// 结合时间戳确保随机性
+						const randomValue = Math.random() * (Date.now() % 1000) / 1000
+						const j = Math.floor(randomValue * (i + 1))
+						;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+					}
+					
+					// 再次打乱以确保随机性
+					for (let i = shuffled.length - 1; i > 0; i--) {
+						const j = Math.floor(Math.random() * (i + 1))
+						;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+					}
+					
+					return shuffled
+				}
+
+				// 初始化 feed 项目（将在 CSV 加载后填充）
+				let feedItems = []
+
+				// 生成 feed 内容
+				function generateFeedContent() {
+					const feedScrollArea = document.getElementById('feedScrollArea')
+					
+					// 清除所有现有内容（包括硬编码的视频），确保每次都是全新随机
+					feedScrollArea.innerHTML = ''
+
+					feedItems.forEach((item, index) => {
+						const feedItem = document.createElement('div')
+						feedItem.className = 'feed-item'
+						feedItem.dataset.index = index
+
+						// 使用优化后的视频
+						const videoPath = `https://ourdreamstaticpages.pages.dev/iframe/demos/assets/feed-v2/${item.videoFile}`
+
+						feedItem.innerHTML = `
+                                <div class="feed-media">
+                                <div class="video-placeholder" id="placeholder-${index}">
+                                    <div class="video-icon">🎬</div>
+                                    <div>AI Video Content</div>
+                                </div>
+                                <video 
+                                    class="feed-video" 
+                                    id="video-${index}"
+                                    loop
+                                    muted
+                                    playsinline
+                                    preload="metadata"
+                                    style="display: none;"
+                                    poster=""
+                                    disablepictureinpicture
+                                    controlslist="nodownload noplaybackrate noremoteplayback"
+                                >
+                                    <source src="${videoPath.replace('.mp4', '.webm')}" type="video/webm">
+                                    <source src="${videoPath}" type="video/mp4">
+                                </video>
+                                </div>
+          `
+
+						feedScrollArea.appendChild(feedItem)
+
+						// 尝试加载视频，失败则回退到占位符
+						const video = feedItem.querySelector(`#video-${index}`)
+						const placeholder = feedItem.querySelector(`#placeholder-${index}`)
+
+						// 强制视频静音并禁用音频控制
+						video.muted = true
+						video.volume = 0
+
+						video.addEventListener('loadeddata', function () {
+							placeholder.style.display = 'none'
+							video.style.display = 'block'
+
+							// 确保视频保持静音
+							video.muted = true
+							video.volume = 0
+
+							console.log(`✅ 视频 ${index + 1} (${item.videoFile}) 从 ${videoPath} 成功加载`)
+						})
+
+						video.addEventListener('error', function (e) {
+							console.error(`❌ 视频 ${index + 1} (${item.videoFile}) 从 ${videoPath} 加载失败:`, e)
+							console.log('显示占位符替代')
+							// 占位符保持可见
+						})
+
+						// 同时记录视频路径以便调试
+						console.log(`🎬 尝试加载: ${videoPath}`)
+
+						// 使视频可点击 - 导航到 feed 同时防止暂停
+						video.addEventListener('click', function (e) {
+							e.preventDefault()
+							e.stopPropagation()
+							// 导航到 feed
+							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}`
+							window.open(clickUrl, '_blank')
+						})
+
+						// 防止通过其他事件暂停
+						video.addEventListener('pause', function (e) {
+							// 仅在视频不可见时允许暂停（交集观察器处理此情况）
+							if (currentVideoIndex === index) {
+								video.play()
+							}
+						})
+
+						// 禁用视频上的上下文菜单
+						video.addEventListener('contextmenu', function (e) {
+							e.preventDefault()
+						})
+
+						// 确保即使用户尝试取消静音，视频也保持静音
+						video.addEventListener('volumechange', function () {
+							if (!video.muted || video.volume > 0) {
+								video.muted = true
+								video.volume = 0
+							}
+						})
+					})
+				}
+
+				// 处理视频交集和自动播放
+				function setupVideoIntersection() {
+					const options = {
+						threshold: 0.7,
+						root: document.getElementById('feedScrollArea'),
+					}
+
+					const observer = new IntersectionObserver((entries) => {
+						entries.forEach((entry) => {
+							const index = parseInt(entry.target.dataset.index)
+							const video = document.getElementById(`video-${index}`)
+
+							if (entry.isIntersecting) {
+								currentVideoIndex = index
+								video.play()
+
+								// 追踪视频观看并检查弹窗触发条件
+								if (!videosViewed.has(index)) {
+									videosViewed.add(index)
+									console.log(`视频 ${index + 1} 已观看。已观看视频总数:`, videosViewed.size)
+
+									// 在第一次交互时隐藏滑动指示器
+									if (!hasInteracted && index > 0) {
+										hasInteracted = true
+										hideSwipeIndicator()
+									}
+
+									// 观看 3 个不同视频后显示弹窗
+									if (videosViewed.size >= 3 && !hasShownPopup) {
+										hasShownPopup = true
+										setTimeout(() => {
+											document.getElementById('popupOverlay').classList.add('show')
+										}, 500) // 短暂延迟以改善用户体验
+									}
+								}
+							} else {
+								video.pause()
+							}
+						})
+					}, options)
+
+					document.querySelectorAll('.feed-item').forEach((item) => {
+						observer.observe(item)
+					})
+				}
+
+				// 隐藏滑动指示器
+				function hideSwipeIndicator() {
+					const swipeIndicator = document.getElementById('swipeIndicator')
+					if (swipeIndicator) {
+						swipeIndicator.classList.add('hidden')
+						console.log('用户交互后隐藏滑动指示器')
+					}
+				}
+
+				// 简单的捕捉到下一个导航
+				function navigateToVideo(direction) {
+					const now = Date.now()
+
+					// 多层保护
+					if (isNavigating) return
+					if (now - lastNavigationTime < 800) return // 导航之间最少 800ms
+
+					let targetIndex = currentVideoIndex
+
+					if (direction === 'next' && currentVideoIndex < feedItems.length - 1) {
+						targetIndex = currentVideoIndex + 1
+					} else if (direction === 'prev' && currentVideoIndex > 0) {
+						targetIndex = currentVideoIndex - 1
+					}
+
+					if (targetIndex === currentVideoIndex) return
+
+					// 立即锁定并更新索引以防止双重触发
+					isNavigating = true
+					lastNavigationTime = now
+					currentVideoIndex = targetIndex
+
+					const feedScrollArea = document.getElementById('feedScrollArea')
+					const targetScrollTop = targetIndex * 244 // 每个视频的高度
+
+					feedScrollArea.scrollTo({
+						top: targetScrollTop,
+						behavior: 'smooth',
+					})
+
+					console.log(`📱 导航到视频 ${targetIndex + 1} (之前是 ${currentVideoIndex})`)
+
+					// 更长的锁定以防止动量/双重触发
+					setTimeout(() => {
+						isNavigating = false
+						console.log(`🔓 导航在视频 ${currentVideoIndex + 1} 处解锁`)
+					}, 1000)
+				}
+
+				// 处理任何滚动/滚轮事件 - 捕捉到下一个/上一个
+				function handleScrollEvent(e) {
+					e.preventDefault()
+					e.stopPropagation()
+
+					if (isNavigating) {
+						console.log(`🚫 导航被阻止 - 正在进行中`)
+						return false
+					}
+
+					const delta = e.deltaY || e.detail || e.wheelDelta
+					console.log(`🖱️ 检测到滚动: delta=${delta}, 当前视频=${currentVideoIndex + 1}`)
+
+					if (Math.abs(delta) < 10) return false // 忽略微小移动
+
+					if (delta > 0) {
+						navigateToVideo('next')
+					} else if (delta < 0) {
+						navigateToVideo('prev')
+					}
+
+					return false
+				}
+
+				// 基于视频的追踪和受控导航
+				function trackScroll() {
+					const feedScrollArea = document.getElementById('feedScrollArea')
+
+					// 添加滚轮事件监听器以进行受控导航
+					feedScrollArea.addEventListener('wheel', handleScrollEvent, { passive: false })
+
+					// 添加移动设备触摸支持
+					let touchStartY = 0
+					let touchEndY = 0
+					let touchMoved = false
+
+					feedScrollArea.addEventListener(
+						'touchstart',
+						function (e) {
+							if (!hasInteracted) {
+								hasInteracted = true
+								hideSwipeIndicator()
+							}
+							touchStartY = e.touches[0].clientY
+							touchMoved = false
+						},
+						{ passive: false }
+					)
+
+					feedScrollArea.addEventListener(
+						'touchmove',
+						function (e) {
+							touchMoved = true
+							// 只有在有显著移动（滑动）时才阻止默认行为
+							const currentY = e.touches[0].clientY
+							const diff = Math.abs(touchStartY - currentY)
+							if (diff > 10) {
+								e.preventDefault()
+								e.stopPropagation()
+							}
+						},
+						{ passive: false }
+					)
+
+					feedScrollArea.addEventListener(
+						'touchend',
+						function (e) {
+							if (isNavigating) {
+								console.log(`🚫 触摸导航被阻止 - 正在进行中`)
+								return
+							}
+
+							touchEndY = e.changedTouches[0].clientY
+							const touchDiff = touchStartY - touchEndY
+							const minSwipeDistance = 50
+
+							console.log(`👆 触摸: start=${touchStartY}, end=${touchEndY}, diff=${touchDiff}`)
+
+							if (Math.abs(touchDiff) > minSwipeDistance) {
+								if (touchDiff > 0) {
+									// 向上滑动（下一个视频）
+									console.log(`👆 检测到向上滑动 - 前往下一个视频`)
+									navigateToVideo('next')
+								} else {
+									// 向下滑动（上一个视频）
+									console.log(`👆 检测到向下滑动 - 前往上一个视频`)
+									navigateToVideo('prev')
+								}
+							} else {
+								console.log(`👆 触摸太小: ${Math.abs(touchDiff)}px < ${minSwipeDistance}px - 视为点击`)
+								// 处理点击 - 检查是否点击了交互元素
+								const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+
+								if (target && !target.closest('.clickable-element') && !target.closest('.feed-header') && !target.closest('.popup-overlay')) {
+									// 点击背景 - 打开 feed
+									console.log(`👆 检测到背景点击 - 打开 feed`)
+									const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+									window.open(clickUrl, '_blank')
+								}
+							}
+						},
+						{ passive: false }
+					)
+
+					// 阻止默认滚动行为
+					feedScrollArea.addEventListener('scroll', function (e) {
+						if (!hasInteracted) {
+							hasInteracted = true
+							hideSwipeIndicator()
+						}
+					})
+
+					// 鼠标交互
+					feedScrollArea.addEventListener(
+						'mousedown',
+						function () {
+							if (!hasInteracted) {
+								hasInteracted = true
+								hideSwipeIndicator()
+							}
+						},
+						{ once: true }
+					)
+
+					console.log('基于视频的追踪已启用：观看 3 个独特视频后显示弹窗')
+					console.log('受控导航已启用：每次一个视频，800ms 节流')
+				}
+
+				// 操作处理函数
+				window.handleLove = function (index) {
+					const lovesElement = document.getElementById(`loves-${index}`)
+					const currentLoves = parseInt(lovesElement.textContent.replace('k', '000').replace('.', ''))
+					// 不增加，只显示动画，因为我们正在导航离开
+
+					// 添加爱心动画
+					const loveIcon = lovesElement.previousElementSibling
+					loveIcon.style.transform = 'scale(1.3)'
+					setTimeout(() => {
+						loveIcon.style.transform = 'scale(1)'
+					}, 200)
+				}
+
+				window.openPhotos = function (index) {
+					if (feedItems[index]) {
+						const photosUrl = `https://undressly.app/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}`
+						window.open(photosUrl, '_blank')
+					}
+				}
+
+				// 处理点击
+				function setupClickHandlers() {
+					const popupButton = document.getElementById('popupButton')
+					const feedContainer = document.getElementById('feedContainer')
+					const feedHeader = document.getElementById('feedHeader')
+					const feedScrollArea = document.getElementById('feedScrollArea')
+
+					let clickStartTime = 0
+					let clickStartY = 0
+
+					// Feed 头部点击（logo + favicon）
+					if (feedHeader) {
+						feedHeader.addEventListener('click', function (e) {
+							e.stopPropagation()
+							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}`
+							window.open(clickUrl, '_blank')
+						})
+					}
+
+					// 弹窗按钮点击
+					if (popupButton) {
+						popupButton.addEventListener('click', function (e) {
+							e.stopPropagation()
+							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}`
+							window.open(clickUrl, '_blank')
+						})
+					}
+
+					// Feed 滚动区域的背景点击处理函数
+					if (feedScrollArea) {
+						feedScrollArea.addEventListener('mousedown', function (e) {
+							clickStartTime = Date.now()
+							clickStartY = e.clientY
+						})
+
+						feedScrollArea.addEventListener('click', function (e) {
+							// 检查这是否是快速点击（不是拖拽/滚动）
+							const clickDuration = Date.now() - clickStartTime
+							if (clickDuration > 300) return // 太长，可能是拖拽
+
+							// 如果点击了交互元素或视频（视频有自己的处理函数），则不触发
+							if (e.target.closest('.clickable-element') || e.target.closest('.feed-header') || e.target.closest('.popup-overlay') || e.target.closest('.feed-video')) {
+								return
+							}
+
+							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+							window.open(clickUrl, '_blank')
+						})
+					}
+
+					// 容器点击（回退）
+					feedContainer.addEventListener('click', function (e) {
+						// 仅在点击容器背景时触发
+						if (e.target === feedContainer) {
+							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}`
+							window.open(clickUrl, '_blank')
+						}
+					})
+				}
+
+				// 初始化 feed
+				function initializeFeed() {
+					try {
+						console.log('🚀 开始 feed 初始化...')
+
+						if (allFeedItems.length === 0) {
+							console.error('❌ 没有可用的 feed 数据 - 中止初始化')
+							return
+						}
+
+						console.log(`✅ Feed 数据准备就绪，包含 ${allFeedItems.length} 个项目`)
+
+						// 随机化并为此会话选择 3 个视频
+						// 每次刷新都会重新随机选择
+						feedItems = shuffleArray(allFeedItems).slice(0, 3)
+                        
+						// 记录选定的视频以便调试
+						console.log(`🎲 随机选择 ${feedItems.length} 个视频（时间戳: ${Date.now()}）:`)
+						feedItems.forEach((item, index) => {
+							console.log(`  ${index + 1}. ${item.character.name} (${item.videoFile})`)
+						})
+
+						console.log('🏗️ 生成 feed 内容...')
+						generateFeedContent()
+
+						console.log('👁️ 设置视频交集...')
+						setupVideoIntersection()
+
+						console.log('🖱️ 设置滚动追踪...')
+						trackScroll()
+
+						console.log('🔗 设置点击处理函数...')
+						setupClickHandlers()
+
+						console.log('✅ Feed 初始化成功！')
+						console.log('📊 配置:', { site, ref, variant })
+						console.log(`🎬 从 ${allFeedItems.length} 个可用视频中显示 5 个随机视频`)
+					} catch (error) {
+						console.error('💥 Feed 初始化失败:', error)
+						console.error('堆栈跟踪:', error.stack)
+					}
+				}
+
+				// 页面加载时启动
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', initializeFeed)
+				} else {
+					initializeFeed()
+				}
+			})()
+		</script>
+	</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Permissions-Policy" content="autoplay=(self), encrypted-media=(self), fullscreen=(self), picture-in-picture=(self)" />
+		<title>undressly.app - SimpCity</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background: #000;
+			}
+
+			#creativeSlot {
+				position: relative;
+			}
+
+			#creativeSlot a {
+				display: block;
+				width: 100%;
+				height: 100%;
+				text-decoration: none;
+				cursor: pointer;
+			}
+
+			#creativeSlot iframe {
+				display: block;
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+
+			video {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="creativeSlot" style="width: 300px; height: 250px"></div>
+
+		<!-- 核心脚本 -->
+		<script src="./config.js"></script>
+		<script src="./abtest.js"></script>
+		<script src="./render.js"></script>
+
+		<!-- 追踪脚本（如果需要的话） -->
+		<!-- <script defer src="./beacon.min.js"></script> -->
+	</body>
+</html>
+
