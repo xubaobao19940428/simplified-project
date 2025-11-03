@@ -645,7 +645,7 @@
 							e.preventDefault()
 							e.stopPropagation()
 							// 导航到 feed
-							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}`
 							window.open(clickUrl, '_blank')
 						})
 
@@ -863,7 +863,7 @@
 								if (target && !target.closest('.clickable-element') && !target.closest('.feed-header') && !target.closest('.popup-overlay')) {
 									// 点击背景 - 打开 feed
 									console.log(`👆 检测到背景点击 - 打开 feed`)
-									const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+									const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
 									window.open(clickUrl, '_blank')
 								}
 							}
@@ -911,7 +911,7 @@
 
 				window.openPhotos = function (index) {
 					if (feedItems[index]) {
-						const photosUrl = `https://undressly.app/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}`
+						const photosUrl = `https://peeloff.app/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}`
 						window.open(photosUrl, '_blank')
 					}
 				}
@@ -930,7 +930,7 @@
 					if (feedHeader) {
 						feedHeader.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -939,7 +939,7 @@
 					if (popupButton) {
 						popupButton.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -961,7 +961,7 @@
 								return
 							}
 
-							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -970,7 +970,7 @@
 					feedContainer.addEventListener('click', function (e) {
 						// 仅在点击容器背景时触发
 						if (e.target === feedContainer) {
-							const clickUrl = `https://undressly.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}`
 							window.open(clickUrl, '_blank')
 						}
 					})

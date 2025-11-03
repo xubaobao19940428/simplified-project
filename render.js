@@ -46,7 +46,7 @@
 	// 构建点击 URL（用于视频创意）
 	let clickUrl = ''
 	if (creative.video) {
-		clickUrl = `https://undressly.app?ref=${encodeURIComponent(site)}&source=nsfw&variant=${encodeURIComponent(variant)}`
+		clickUrl = `https://peeloff.app?utm_source=${encodeURIComponent(site)}&utm_medium=video&utm_campaign=${encodeURIComponent(variant)}`
 		if (gender) {
 			clickUrl += `&gender=${encodeURIComponent(gender)}`
 		}
