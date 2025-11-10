@@ -6,6 +6,11 @@
 		<title>AI Feed - undressly.app</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<style>
+			:root {
+				--feed-width: 294px;
+				--feed-height: 244px;
+			}
+
 			html,
 			body {
 				margin: 0;
@@ -18,8 +23,8 @@
 
             
 			.feed-container {
-				width: 294px;
-				height: 244px;
+				width: var(--feed-width);
+				height: var(--feed-height);
 				background: #000000;
 				border-radius: 12px;
 				overflow: hidden;
@@ -51,7 +56,7 @@
 			.feed-item {
 				position: relative;
 				width: 100%;
-				height: 244px;
+				height: var(--feed-height);
 				display: flex;
 				flex-direction: column;
 				background: #000000;
@@ -449,6 +454,9 @@
 				const site = urlParams.get('site') || 'demo'
 				const ref = urlParams.get('ref') || site
 				const variant = urlParams.get('variant') || 'i-feed-v2'
+				const widthParam = urlParams.get('width') || urlParams.get('w')
+				const heightParam = urlParams.get('height') || urlParams.get('h')
+                const utm_content = urlParams.get('content') || ''
 
 				// 视频追踪
 				let videosViewed = new Set([0]) // 从第一个视频已观看开始
@@ -458,12 +466,40 @@
 				let hasInteracted = false
 				let isNavigating = false
 				let lastNavigationTime = 0
+				let dynamicFeedHeight = null
+				let dynamicFeedWidth = null
+
+				function parseSizeParam(value, fallback) {
+					if (!value) return fallback
+					const trimmed = value.trim().toLowerCase()
+					if (trimmed.endsWith('px') || trimmed.endsWith('%') || trimmed.endsWith('vh') || trimmed.endsWith('vw')) {
+						return trimmed
+					}
+					const numeric = parseFloat(trimmed)
+					if (Number.isFinite(numeric) && numeric > 0) {
+						return `${numeric}px`
+					}
+					return fallback
+				}
+
+				function applyDynamicSize() {
+					const computedWidth = parseSizeParam(widthParam, '294px')
+					const computedHeight = parseSizeParam(heightParam, '244px')
+
+					dynamicFeedWidth = computedWidth.endsWith('px') ? parseFloat(computedWidth) : null
+					dynamicFeedHeight = computedHeight.endsWith('px') ? parseFloat(computedHeight) : null
+
+					document.documentElement.style.setProperty('--feed-width', computedWidth)
+					document.documentElement.style.setProperty('--feed-height', computedHeight)
+
+					console.log('📐 应用动态尺寸:', { computedWidth, computedHeight })
+				}
 
 				// Feed 数据（来自 CSV）
 				const allFeedItems = [
 					{
 						id: 1,
-						handle: 'zoey',
+						handle: 'undress',
 						character: {
 							name: 'Zoey',
 							avatar: 'Z',
@@ -476,62 +512,62 @@
 						photosPath: 'photos/zoey-83',
 					},
 
-					// {
-					// 	id: 3,
-					// 	handle: 'mina',
-					// 	character: {
-					// 		name: 'Mina Park',
-					// 		avatar: 'M',
-					// 		description: 'The new girl who just moved next door.',
-					// 		username: '@anon_f11bedfd',
-					// 	},
-					// 	videoFile: 'mina-optimized.mp4',
-					// 	avatarFile: 'mina-avatar.avif',
-					// 	loves: '1.9k',
-					// 	photosPath: 'photos/mina-park',
-					// },
-					// {
-					// 	id: 4,
-					// 	handle: 'nyx',
-					// 	character: {
-					// 		name: 'Nyx Tether',
-					// 		avatar: 'N',
-					// 		description: 'Nyx is a woman who has chosen to embark on a unique path of self-discovery',
-					// 		username: '@jetstone',
-					// 	},
-					// 	videoFile: 'nyx-optimized.mp4',
-					// 	avatarFile: 'nyx-avatar.avif',
-					// 	loves: '343',
-					// 	photosPath: 'photos/onyx-real-f5h6NkNiRV',
-					// },
-					// {
-					// 	id: 5,
-					// 	handle: 'lara',
-					// 	character: {
-					// 		name: 'Lara Quinn',
-					// 		avatar: 'L',
-					// 		description: 'Your stepsister with a secret fascination for voyeurism and a hidden desire',
-					// 		username: '@kurtishurtis',
-					// 	},
-					// 	videoFile: 'lara-optimized.mp4',
-					// 	avatarFile: 'lara-avatar.avif',
-					// 	loves: '507',
-					// 	photosPath: 'photos/lara-quinn',
-					// },
-					// {
-					// 	id: 6,
-					// 	handle: 'tylar',
-					// 	character: {
-					// 		name: 'Tylar',
-					// 		avatar: 'T',
-					// 		description: 'Your snowbunny GF is about to turn your world upside down',
-					// 		username: '@daddykelli',
-					// 	},
-					// 	videoFile: 'tylar-optimized.mp4',
-					// 	avatarFile: 'tylar-avatar.avif',
-					// 	loves: '1.6k',
-					// 	photosPath: 'photos/tylar',
-					// },
+					{
+						id: 3,
+						handle: 'undressBanner',
+						character: {
+							name: 'Mina Park',
+							avatar: 'M',
+							description: 'The new girl who just moved next door.',
+							username: '@anon_f11bedfd',
+						},
+						imageFile: '/resources/images/728x90_undress_banner.png',
+						avatarFile: 'mina-avatar.avif',
+						loves: '1.9k',
+						photosPath: 'photos/mina-park',
+					},
+					{
+						id: 4,
+						handle: 'blowjob',
+						character: {
+							name: 'Nyx Tether',
+							avatar: 'N',
+							description: 'Nyx is a woman who has chosen to embark on a unique path of self-discovery',
+							username: '@jetstone',
+						},
+						videoFile: '/resources/images/2e005641da767aebea0ba188e15c68f1.mp4',
+						avatarFile: 'nyx-avatar.avif',
+						loves: '343',
+						photosPath: 'photos/onyx-real-f5h6NkNiRV',
+					},
+					{
+						id: 5,
+						handle: 'cumface',
+						character: {
+							name: 'Lara Quinn',
+							avatar: 'L',
+							description: 'Your stepsister with a secret fascination for voyeurism and a hidden desire',
+							username: '@kurtishurtis',
+						},
+						videoFile: '/resources/images/a8d1685d968c71a3ad02af254a5e2bb0.mp4',
+						avatarFile: 'lara-avatar.avif',
+						loves: '507',
+						photosPath: 'photos/lara-quinn',
+					},
+					{
+						id: 6,
+						handle: 'bannerPm',
+						character: {
+							name: 'Tylar',
+							avatar: 'T',
+							description: 'Your snowbunny GF is about to turn your world upside down',
+							username: '@daddykelli',
+						},
+						videoFile: '/resources/images/23ecf10f059a63961af5b16844c877ea.mp4',
+						avatarFile: 'tylar-avatar.avif',
+						loves: '1.6k',
+						photosPath: 'photos/tylar',
+					},
 					// {
 					// 	id: 7,
 					// 	handle: 'genie',
@@ -548,27 +584,6 @@
 					// },
 				]
 
-				// 打乱数组函数（Fisher-Yates 洗牌算法）- 确保每次刷新都随机
-				function shuffleArray(array) {
-					const shuffled = [...array] // 创建副本
-
-					// 使用更可靠的随机方法，确保每次都是真正的随机
-					for (let i = shuffled.length - 1; i > 0; i--) {
-						// 结合时间戳确保随机性
-						const randomValue = (Math.random() * (Date.now() % 1000)) / 1000
-						const j = Math.floor(randomValue * (i + 1))
-						;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-					}
-
-					// 再次打乱以确保随机性
-					for (let i = shuffled.length - 1; i > 0; i--) {
-						const j = Math.floor(Math.random() * (i + 1))
-						;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-					}
-
-					return shuffled
-				}
-
 				// 初始化 feed 项目（将在 CSV 加载后填充）
 				let feedItems = []
 
@@ -584,92 +599,114 @@
 						feedItem.className = 'feed-item'
 						feedItem.dataset.index = index
 
-						// 使用优化后的视频
-						const videoPath = `https://cdn.lovepal.net${item.videoFile}`
+						let mediaMarkup = ''
 
-						feedItem.innerHTML = `
+						if (item.videoFile) {
+							const videoPath = `https://cdn.lovepal.net${item.videoFile}`
+							mediaMarkup = `
                                 <div class="feed-media">
-                                <div class="video-placeholder" id="placeholder-${index}">
-                                    <div class="video-icon">🎬</div>
-                                    <div>AI Video Content</div>
-                                </div>
-                                <video 
-                                    class="feed-video" 
-                                    id="video-${index}"
-                                    loop
-                                    muted
-                                    playsinline
-                                    preload="metadata"
-                                    style="display: none;"
-                                    poster=""
-                                    disablepictureinpicture
-                                    controlslist="nodownload noplaybackrate noremoteplayback"
-                                >
-                                    <source src="${videoPath}"> 
-                                </video>
+                                    <div class="video-placeholder" id="placeholder-${index}">
+                                        <div class="video-icon">🎬</div>
+                                        <div>AI Video Content</div>
+                                    </div>
+                                    <video 
+                                        class="feed-video" 
+                                        id="video-${index}"
+                                        loop
+                                        muted
+                                        playsinline
+                                        preload="metadata"
+                                        style="display: none;"
+                                        poster=""
+                                        disablepictureinpicture
+                                        controlslist="nodownload noplaybackrate noremoteplayback"
+                                    >
+                                        <source src="${videoPath}">
+                                    </video>
                                 </div>`
-						//   <source src="${videoPath.replace('.mp4', '.webm')}" type="video/webm">
-						//   <source src="${videoPath}" type="video/mp4">
+						} else if (item.imageFile) {
+							const imagePath = `https://cdn.lovepal.net${item.imageFile}`
+							mediaMarkup = `
+                                <div class="feed-media">
+                                    <img 
+                                        class="feed-image"
+                                        id="image-${index}"
+                                        src="${imagePath}"
+                                        alt="${item.character?.name || 'AI Image'}"
+                                        draggable="false"
+                                    />
+                                </div>`
+						} else {
+							mediaMarkup = `
+                                <div class="feed-media">
+                                    <div class="video-placeholder">
+                                        <div class="video-icon">⚠️</div>
+                                        <div>No media available</div>
+                                    </div>
+                                </div>`
+						}
 
+						feedItem.innerHTML = mediaMarkup
 						feedScrollArea.appendChild(feedItem)
 
-						// 尝试加载视频，失败则回退到占位符
-						const video = feedItem.querySelector(`#video-${index}`)
-						const placeholder = feedItem.querySelector(`#placeholder-${index}`)
+						if (item.videoFile) {
+							const video = feedItem.querySelector(`#video-${index}`)
+							const placeholder = feedItem.querySelector(`#placeholder-${index}`)
 
-						// 强制视频静音并禁用音频控制
-						video.muted = true
-						video.volume = 0
-
-						video.addEventListener('loadeddata', function () {
-							placeholder.style.display = 'none'
-							video.style.display = 'block'
-
-							// 确保视频保持静音
+							// 强制视频静音并禁用音频控制
 							video.muted = true
 							video.volume = 0
 
-							console.log(`✅ 视频 ${index + 1} (${item.videoFile}) 从 ${videoPath} 成功加载`)
-						})
+							video.addEventListener('loadeddata', function () {
+								placeholder.style.display = 'none'
+								video.style.display = 'block'
 
-						video.addEventListener('error', function (e) {
-							console.error(`❌ 视频 ${index + 1} (${item.videoFile}) 从 ${videoPath} 加载失败:`, e)
-							console.log('显示占位符替代')
-							// 占位符保持可见
-						})
-
-						// 同时记录视频路径以便调试
-						console.log(`🎬 尝试加载: ${videoPath}`)
-
-						// 使视频可点击 - 导航到 feed 同时防止暂停
-						video.addEventListener('click', function (e) {
-							e.preventDefault()
-							e.stopPropagation()
-							// 导航到 feed
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}`
-							window.open(clickUrl, '_blank')
-						})
-
-						// 防止通过其他事件暂停
-						video.addEventListener('pause', function (e) {
-							// 仅在视频不可见时允许暂停（交集观察器处理此情况）
-							if (currentVideoIndex === index) {
-								video.play()
-							}
-						})
-
-						// 禁用视频上的上下文菜单
-						video.addEventListener('contextmenu', function (e) {
-							e.preventDefault()
-						})
-
-						// 确保即使用户尝试取消静音，视频也保持静音
-						video.addEventListener('volumechange', function () {
-							if (!video.muted || video.volume > 0) {
+								// 确保视频保持静音
 								video.muted = true
 								video.volume = 0
-							}
-						})
+
+								console.log(`✅ 视频 ${index + 1} (${item.videoFile}) 从 https://cdn.lovepal.net 成功加载`)
+							})
+
+							video.addEventListener('error', function (e) {
+								console.error(`❌ 视频 ${index + 1} (${item.videoFile}) 加载失败:`, e)
+								console.log('显示占位符替代')
+								// 占位符保持可见
+							})
+
+							// 同时记录视频路径以便调试
+							console.log(`🎬 尝试加载: https://cdn.lovepal.net${item.videoFile}`)
+
+							// 使视频可点击 - 导航到 feed 同时防止暂停
+							video.addEventListener('click', function (e) {
+								e.preventDefault()
+								e.stopPropagation()
+								// 导航到 feed
+								const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+								window.open(clickUrl, '_blank')
+							})
+
+							// 防止通过其他事件暂停
+							video.addEventListener('pause', function (e) {
+								// 仅在视频不可见时允许暂停（交集观察器处理此情况）
+								if (currentVideoIndex === index) {
+									video.play()
+								}
+							})
+
+							// 禁用视频上的上下文菜单
+							video.addEventListener('contextmenu', function (e) {
+								e.preventDefault()
+							})
+
+							// 确保即使用户尝试取消静音，视频也保持静音
+							video.addEventListener('volumechange', function () {
+								if (!video.muted || video.volume > 0) {
+									video.muted = true
+									video.volume = 0
+								}
+							})
+						}
 					})
 				}
 
@@ -684,6 +721,10 @@
 						entries.forEach((entry) => {
 							const index = parseInt(entry.target.dataset.index)
 							const video = document.getElementById(`video-${index}`)
+
+							if (!video) {
+								return
+							}
 
 							if (entry.isIntersecting) {
 								currentVideoIndex = index
@@ -709,7 +750,9 @@
 									}
 								}
 							} else {
-								video.pause()
+								if (video) {
+									video.pause()
+								}
 							}
 						})
 					}, options)
@@ -752,7 +795,11 @@
 					currentVideoIndex = targetIndex
 
 					const feedScrollArea = document.getElementById('feedScrollArea')
-					const targetScrollTop = targetIndex * 244 // 每个视频的高度
+					const itemHeight =
+						dynamicFeedHeight ||
+						document.querySelector('.feed-item')?.getBoundingClientRect().height ||
+						244
+					const targetScrollTop = targetIndex * itemHeight // 每个视频的高度
 
 					feedScrollArea.scrollTo({
 						top: targetScrollTop,
@@ -864,7 +911,7 @@
 								if (target && !target.closest('.clickable-element') && !target.closest('.feed-header') && !target.closest('.popup-overlay')) {
 									// 点击背景 - 打开 feed
 									console.log(`👆 检测到背景点击 - 打开 feed`)
-									const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+									const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(content)}`
 									window.open(clickUrl, '_blank')
 								}
 							}
@@ -912,7 +959,7 @@
 
 				window.openPhotos = function (index) {
 					if (feedItems[index]) {
-						const photosUrl = `https://loveone.wiki/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}`
+						const photosUrl = `https://loveone.wiki/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 						window.open(photosUrl, '_blank')
 					}
 				}
@@ -931,7 +978,7 @@
 					if (feedHeader) {
 						feedHeader.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -940,7 +987,7 @@
 					if (popupButton) {
 						popupButton.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -962,7 +1009,7 @@
 								return
 							}
 
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -971,7 +1018,7 @@
 					feedContainer.addEventListener('click', function (e) {
 						// 仅在点击容器背景时触发
 						if (e.target === feedContainer) {
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}`
+							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						}
 					})
@@ -989,21 +1036,49 @@
 
 						console.log(`✅ Feed 数据准备就绪，包含 ${allFeedItems.length} 个项目`)
 
-						// 随机化并为此会话选择 3 个视频
-						// 每次刷新都会重新随机选择
-						feedItems = shuffleArray(allFeedItems).slice(0, 3)
+						// 根据 URL 参数选择单个展示项（优先 handle，其次 id）
+						const requestedKeyRaw = urlParams.get('item') || urlParams.get('handle') || urlParams.get('id')
+						const defaultHandle = 'undress'
 
-						// 记录选定的视频以便调试
-						console.log(`🎲 随机选择 ${feedItems.length} 个视频（时间戳: ${Date.now()}）:`)
-						feedItems.forEach((item, index) => {
-							console.log(`  ${index + 1}. ${item.character.name} (${item.videoFile})`)
-						})
+						let selectedItem = null
+
+						if (requestedKeyRaw) {
+							const requestedKey = requestedKeyRaw.toLowerCase()
+							selectedItem = allFeedItems.find(
+								(item) =>
+									(item.handle && item.handle.toLowerCase() === requestedKey) ||
+									String(item.id) === requestedKeyRaw
+							)
+						}
+
+						if (!selectedItem) {
+							selectedItem =
+								allFeedItems.find((item) => item.handle && item.handle.toLowerCase() === defaultHandle) ||
+								allFeedItems[0]
+						}
+
+						if (!selectedItem) {
+							console.error('❌ 未找到有效的 feed 项目 - 中止初始化')
+							return
+						}
+
+						feedItems = [selectedItem]
+
+						console.log(`🎯 选定展示项目: ${selectedItem.character?.name || selectedItem.handle || selectedItem.id}`)
+						console.log(
+							`📼 媒体类型: ${
+								selectedItem.videoFile ? 'video' : selectedItem.imageFile ? 'image' : 'unknown'
+							}`
+						)
 
 						console.log('🏗️ 生成 feed 内容...')
+						applyDynamicSize()
 						generateFeedContent()
 
 						console.log('👁️ 设置视频交集...')
-						setupVideoIntersection()
+						if (feedItems.some((item) => item.videoFile)) {
+							setupVideoIntersection()
+						}
 
 						console.log('🖱️ 设置滚动追踪...')
 						trackScroll()
@@ -1013,7 +1088,7 @@
 
 						console.log('✅ Feed 初始化成功！')
 						console.log('📊 配置:', { site, ref, variant })
-						console.log(`🎬 从 ${allFeedItems.length} 个可用视频中显示 5 个随机视频`)
+						console.log('🖼️ 当前展示为单条内容。')
 					} catch (error) {
 						console.error('💥 Feed 初始化失败:', error)
 						console.error('堆栈跟踪:', error.stack)
