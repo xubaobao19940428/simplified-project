@@ -468,6 +468,11 @@
 				let lastNavigationTime = 0
 				let dynamicFeedHeight = null
 				let dynamicFeedWidth = null
+				
+				// bannerPm 展示追踪像素 URL
+				const IMPRESSION_PIXEL_URL = 'https://rr.rndomnm.com/impression/696105df863138e0d842255d'
+				// 追踪已触发过像素的 bannerPm 展示时间戳（用于防止重复触发）
+				let bannerPmImpressionTracked = new Map()
 
 				function parseSizeParam(value, fallback) {
 					if (!value) return fallback
@@ -682,7 +687,7 @@
 								e.preventDefault()
 								e.stopPropagation()
 								// 导航到 feed
-								const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+								const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 								window.open(clickUrl, '_blank')
 							})
 
@@ -710,6 +715,47 @@
 					})
 				}
 
+				// 触发 bannerPm 展示追踪像素
+				function fireBannerPmImpressionPixel(index) {
+					// 检查是否是 bannerPm 项目
+					const item = feedItems[index]
+					if (!item || item.handle !== 'bannerPm') {
+						return
+					}
+
+					// 创建唯一标识符（基于索引和时间戳，允许刷新/轮换时重新触发）
+					const impressionId = `${index}-${Date.now()}`
+					
+					// 使用防抖机制：在短时间内（500ms）只触发一次，但允许刷新后重新触发
+					const debounceKey = `bannerPm-${index}`
+					const lastTriggerTime = bannerPmImpressionTracked.get(debounceKey) || 0
+					const now = Date.now()
+					
+					// 如果距离上次触发超过 500ms，则触发新的像素（允许刷新/轮换）
+					if (now - lastTriggerTime > 500) {
+						bannerPmImpressionTracked.set(debounceKey, now)
+						
+						// 创建图片元素触发像素
+						const pixel = new Image()
+						pixel.src = IMPRESSION_PIXEL_URL
+						pixel.style.display = 'none'
+						pixel.width = 1
+						pixel.height = 1
+						
+						// 添加到页面以触发请求
+						document.body.appendChild(pixel)
+						
+						// 清理：1秒后移除元素
+						setTimeout(() => {
+							if (pixel.parentNode) {
+								pixel.parentNode.removeChild(pixel)
+							}
+						}, 1000)
+						
+						console.log(`📊 bannerPm (300x250) 展示追踪像素已触发 - 索引: ${index}`)
+					}
+				}
+
 				// 处理视频交集和自动播放
 				function setupVideoIntersection() {
 					const options = {
@@ -721,32 +767,41 @@
 						entries.forEach((entry) => {
 							const index = parseInt(entry.target.dataset.index)
 							const video = document.getElementById(`video-${index}`)
+							const image = document.getElementById(`image-${index}`)
 
-							if (!video) {
-								return
-							}
+							// 检查是否是 bannerPm 项目（视频或图片）
+							const item = feedItems[index]
+							const isBannerPm = item && item.handle === 'bannerPm'
 
 							if (entry.isIntersecting) {
-								currentVideoIndex = index
-								video.play()
+								// 如果是 bannerPm，触发展示追踪像素
+								if (isBannerPm) {
+									fireBannerPmImpressionPixel(index)
+								}
 
-								// 追踪视频观看并检查弹窗触发条件
-								if (!videosViewed.has(index)) {
-									videosViewed.add(index)
-									console.log(`视频 ${index + 1} 已观看。已观看视频总数:`, videosViewed.size)
+								// 处理视频播放
+								if (video) {
+									currentVideoIndex = index
+									video.play()
 
-									// 在第一次交互时隐藏滑动指示器
-									if (!hasInteracted && index > 0) {
-										hasInteracted = true
-										hideSwipeIndicator()
-									}
+									// 追踪视频观看并检查弹窗触发条件
+									if (!videosViewed.has(index)) {
+										videosViewed.add(index)
+										console.log(`视频 ${index + 1} 已观看。已观看视频总数:`, videosViewed.size)
 
-									// 观看 3 个不同视频后显示弹窗
-									if (videosViewed.size >= 3 && !hasShownPopup) {
-										hasShownPopup = true
-										setTimeout(() => {
-											document.getElementById('popupOverlay').classList.add('show')
-										}, 500) // 短暂延迟以改善用户体验
+										// 在第一次交互时隐藏滑动指示器
+										if (!hasInteracted && index > 0) {
+											hasInteracted = true
+											hideSwipeIndicator()
+										}
+
+										// 观看 3 个不同视频后显示弹窗
+										if (videosViewed.size >= 3 && !hasShownPopup) {
+											hasShownPopup = true
+											setTimeout(() => {
+												document.getElementById('popupOverlay').classList.add('show')
+											}, 500) // 短暂延迟以改善用户体验
+										}
 									}
 								}
 							} else {
@@ -911,7 +966,7 @@
 								if (target && !target.closest('.clickable-element') && !target.closest('.feed-header') && !target.closest('.popup-overlay')) {
 									// 点击背景 - 打开 feed
 									console.log(`👆 检测到背景点击 - 打开 feed`)
-									const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(content)}`
+									const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(content)}`
 									window.open(clickUrl, '_blank')
 								}
 							}
@@ -959,7 +1014,7 @@
 
 				window.openPhotos = function (index) {
 					if (feedItems[index]) {
-						const photosUrl = `https://loveone.wiki/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+						const photosUrl = `https://nakedher.com/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 						window.open(photosUrl, '_blank')
 					}
 				}
@@ -978,7 +1033,7 @@
 					if (feedHeader) {
 						feedHeader.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -987,7 +1042,7 @@
 					if (popupButton) {
 						popupButton.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -1009,7 +1064,7 @@
 								return
 							}
 
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -1018,7 +1073,7 @@
 					feedContainer.addEventListener('click', function (e) {
 						// 仅在点击容器背景时触发
 						if (e.target === feedContainer) {
-							const clickUrl = `https://loveone.wiki?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-container&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						}
 					})
