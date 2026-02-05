@@ -607,7 +607,7 @@
 						let mediaMarkup = ''
 
 						if (item.videoFile) {
-							const videoPath = `https://cdn.lovepal.net${item.videoFile}`
+							const videoPath = `https://file2.nakedly.ai${item.videoFile}`
 							mediaMarkup = `
                                 <div class="feed-media">
                                     <div class="video-placeholder" id="placeholder-${index}">
@@ -630,7 +630,7 @@
                                     </video>
                                 </div>`
 						} else if (item.imageFile) {
-							const imagePath = `https://cdn.lovepal.net${item.imageFile}`
+							const imagePath = `https://file2.nakedly.ai${item.imageFile}`
 							mediaMarkup = `
                                 <div class="feed-media">
                                     <img 
@@ -670,7 +670,7 @@
 								video.muted = true
 								video.volume = 0
 
-								console.log(`✅ 视频 ${index + 1} (${item.videoFile}) 从 https://cdn.lovepal.net 成功加载`)
+								console.log(`✅ 视频 ${index + 1} (${item.videoFile}) 从 https://file2.nakedly.ai 成功加载`)
 							})
 
 							video.addEventListener('error', function (e) {
@@ -680,14 +680,14 @@
 							})
 
 							// 同时记录视频路径以便调试
-							console.log(`🎬 尝试加载: https://cdn.lovepal.net${item.videoFile}`)
+							console.log(`🎬 尝试加载: https://file2.nakedly.ai${item.videoFile}`)
 
 							// 使视频可点击 - 导航到 feed 同时防止暂停
 							video.addEventListener('click', function (e) {
 								e.preventDefault()
 								e.stopPropagation()
 								// 导航到 feed
-								const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+								const clickUrl = `https://nakedly.ai?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-video&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 								window.open(clickUrl, '_blank')
 							})
 
@@ -966,7 +966,7 @@
 								if (target && !target.closest('.clickable-element') && !target.closest('.feed-header') && !target.closest('.popup-overlay')) {
 									// 点击背景 - 打开 feed
 									console.log(`👆 检测到背景点击 - 打开 feed`)
-									const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(content)}`
+									const clickUrl = `https://nakedly.ai?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-background&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(content)}`
 									window.open(clickUrl, '_blank')
 								}
 							}
@@ -1014,7 +1014,7 @@
 
 				window.openPhotos = function (index) {
 					if (feedItems[index]) {
-						const photosUrl = `https://nakedher.com/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+						const photosUrl = `https://nakedly.ai/${feedItems[index].photosPath}?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-character&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 						window.open(photosUrl, '_blank')
 					}
 				}
@@ -1033,7 +1033,7 @@
 					if (feedHeader) {
 						feedHeader.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedly.ai?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-header&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
@@ -1042,7 +1042,7 @@
 					if (popupButton) {
 						popupButton.addEventListener('click', function (e) {
 							e.stopPropagation()
-							const clickUrl = `https://nakedher.com?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
+							const clickUrl = `https://nakedly.ai?utm_source=${encodeURIComponent(ref)}&utm_medium=feed-popup&utm_campaign=${encodeURIComponent(variant)}&utm_content=${encodeURIComponent(utm_content)}`
 							window.open(clickUrl, '_blank')
 						})
 					}
